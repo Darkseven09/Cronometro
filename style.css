@@ -1,0 +1,259 @@
+:root {
+  --bg: #0f2b2a;
+  --surface: #143b3a;
+  --text: #e8fffb;
+  --muted: #9ad1cc;
+  --track: #23504f;
+  --progress: #ffd54f; /* amarelo para o anel */
+  --prepare: #ffd54f; /* amarelo rótulo */
+  --exercise: #ff5252; /* vermelho */
+  --rest: #69f0ae; /* verde */
+  --focus: #7fffd4;
+  --white: #ffffff;
+  --green: #2DB34F;
+  --yellow: #F5D33B;
+  --red: #D12B2B;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  /* Fallback de cor de fundo */
+  background-color: var(--bg);
+  /* Imagem de fundo */
+  background-image: url('img/bakground.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Safe areas (iOS notch) */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Overlay sutil para legibilidade */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.55));
+  z-index: 0;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: transparent;
+}
+.app-header h1 { margin: 0; font-size: 1.4rem; letter-spacing: .5px; }
+
+/* Utilitárias */
+.text-white { color: var(--white) !important; }
+.count-white { color: var(--white) !important; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
+
+.container {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 8px 16px 24px;
+  position: relative;
+  z-index: 1; /* acima do overlay */
+}
+
+.display { text-align: center; margin-top: 8px; }
+.ring-wrap {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 12px auto 8px;
+}
+
+.progress-ring { width: 100%; height: 100%; }
+.ring-track {
+  fill: none;
+  stroke: var(--track);
+  opacity: .6;
+}
+.ring-progress {
+  fill: none;
+  stroke: var(--progress);
+  stroke-linecap: round;
+  stroke-dasharray: 327; /* aproximado, ajustado via JS */
+  stroke-dashoffset: 327;
+  transition: stroke-dashoffset 1s linear;
+}
+
+/* Cores do anel por fase */
+.ring-progress.ring--prepare { stroke: #f5d33b; }
+.ring-progress.ring--exercise { stroke: #d12b2b; }
+.ring-progress.ring--rest { stroke: #2db34f; }
+
+.time-display {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+  font-size: 3rem;
+  letter-spacing: 1px;
+}
+
+.phase {
+  margin-top: 8px;
+  font-weight: 600;
+}
+.phase-prepare { color: var(--prepare); }
+.phase-exercise { color: var(--exercise); }
+.phase-rest { color: var(--rest); }
+
+/* Phase live (Run Screen) */
+.phase-live {
+  margin-top: 10px;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.phase-live.prepare { color: var(--prepare); }
+.phase-live.exercise { color: var(--exercise); }
+.phase-live.rest { color: var(--rest); }
+
+.controls { margin-top: 16px; }
+.config {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 12px;
+}
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { color: var(--muted); font-size: .9rem; }
+.field input[type="time"],
+.field input[type="number"] {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--track);
+  background: var(--surface);
+  color: var(--text);
+}
+.field input:focus { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 2px solid currentColor;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 700;
+  letter-spacing: .3px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}
+.btn.primary { background: #1a5a58; border-color: #1a5a58; }
+.btn:disabled { opacity: .5; }
+.btn:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+.btn:hover { filter: brightness(.96); }
+.btn.small { min-height: 40px; padding: 8px 10px; }
+
+.presets { margin-top: 18px; }
+.presets label { color: var(--muted); display: inline-block; margin-bottom: 6px; }
+.preset-row { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; }
+#presetSelect {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--track);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.footer { margin-top: 18px; text-align: center; color: var(--muted); }
+.total-time { font-variant-numeric: tabular-nums; }
+
+/* Run Screen info rows */
+.run-info {
+  margin: 16px auto 8px;
+  max-width: 360px;
+}
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(11, 48, 46, .85);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  box-shadow: 0 6px 14px rgba(0,0,0,.25);
+}
+.info-title { color: var(--white); font-weight: 700; letter-spacing: .5px; }
+.info-value { font-variant-numeric: tabular-nums; font-weight: 700; }
+
+.finish-msg {
+  margin-top: 14px;
+  text-align: center;
+  font-weight: 800;
+  color: var(--rest);
+  font-size: 1.1rem;
+}
+
+@media (min-width: 440px) {
+  .container { padding: 16px 24px 32px; }
+  .time-display { font-size: 3.4rem; }
+}
+
+/* =====================
+   Setup screen (texto branco + botões coloridos)
+   ===================== */
+#setupScreen, #setupScreen * { color: var(--white); }
+#setupScreen input, #setupScreen select { color: var(--white); }
+#setupScreen ::placeholder { color: rgba(255,255,255,.75); }
+
+/* Botões da tela inicial */
+#setupScreen #startBtn {
+  background: var(--white);
+  color: #0B210F; /* contraste no branco */
+  border-color: var(--green);
+}
+#setupScreen #savePresetBtn {
+  background: var(--white);
+  color: #1B1B1B;
+  border-color: var(--yellow);
+}
+#setupScreen #deletePresetBtn {
+  background: var(--white);
+  color: #1B1B1B;
+  border-color: var(--red);
+}
+
+#setupScreen #startBtn:hover,
+#setupScreen #savePresetBtn:hover,
+#setupScreen #deletePresetBtn:hover { filter: brightness(0.97); }
+
+/* Botões por estado - sólidos */
+.btn--yellow { background: #F5D33B !important; color: #1B1B1B !important; border: none !important; }
+.btn--green { background: #2DB34F !important; color: #0B210F !important; border: none !important; }
+.btn--red { background: #D12B2B !important; color: #FFFFFF !important; border: none !important; }
+
+/* Botões por estado (sólidos + borda visível) */
+.btn--yellow { background: #F5D33B; border-color: #F5D33B; color: #1B1B1B; }
+.btn--green { background: #2DB34F; border-color: #2DB34F; color: #0B210F; }
+.btn--red { background: #D12B2B; border-color: #D12B2B; color: #FFFFFF; }
+
+.btn--yellow:hover { filter: brightness(0.95); }
+.btn--green:hover { filter: brightness(0.95); }
+.btn--red:hover { filter: brightness(0.95); }

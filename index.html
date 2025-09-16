@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f2b2a" />
+    <title>Power Fire</title>
+    <link rel="manifest" href="manifest.json" />
+    <!-- iOS PWA fullscreen -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1 class="title text-white">Power Fire</h1>
+    </header>
+
+    <main class="container">
+      <!-- Tela de configuração -->
+      <section id="setupScreen">
+        <section class="controls">
+          <form id="configForm" class="config" novalidate>
+            <div class="field">
+              <label for="prepTime">Prepare</label>
+              <input id="prepTime" type="time" step="1" value="00:05" required />
+            </div>
+            <div class="field">
+              <label for="exTime">Exercite</label>
+              <input id="exTime" type="time" step="1" value="00:30" required />
+            </div>
+            <div class="field">
+              <label for="restTime">Descanso</label>
+              <input id="restTime" type="time" step="1" value="00:30" required />
+            </div>
+            <div class="field">
+              <label for="sets">Conjuntos</label>
+              <input id="sets" type="number" min="1" value="4" required />
+            </div>
+          </form>
+
+          <div class="buttons">
+            <button id="startBtn" class="btn btn--green">INICIAR</button>
+          </div>
+        </section>
+
+        <section class="presets">
+          <label for="presetSelect">Presets</label>
+          <div class="preset-row">
+            <select id="presetSelect" aria-label="Selecionar preset"></select>
+            <button id="savePresetBtn" class="btn btn--yellow">Salvar</button>
+            <button id="deletePresetBtn" class="btn btn--red">Excluir</button>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <div id="totalTime" class="total-time" aria-live="polite">Total: 00:00</div>
+        </footer>
+      </section>
+
+      <!-- Tela de execução -->
+      <section id="runScreen" hidden>
+        <section class="display">
+          <div class="ring-wrap">
+            <svg class="progress-ring" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="ring-track" cx="60" cy="60" r="52" stroke-width="8" />
+              <circle id="progressArc" class="ring-progress" cx="60" cy="60" r="52" stroke-width="8" transform="rotate(-90 60 60)" />
+            </svg>
+            <div id="timeDisplay" class="time-display count-white" role="timer" aria-live="polite">00:00</div>
+          </div>
+          <div id="phaseLive" class="phase-live">Prepare</div>
+        </section>
+
+        <section class="run-info">
+          <div class="info-row">
+            <div class="info-title">CONJUNTOS</div>
+            <div class="info-value" id="setsRemaining">0</div>
+          </div>
+          <div class="info-row">
+            <div class="info-title">TEMPO TOTAL</div>
+            <div class="info-value" id="totalRemaining">00:00</div>
+          </div>
+        </section>
+
+        <div class="buttons">
+          <button id="pauseBtn" class="btn" disabled>PAUSAR</button>
+          <button id="resetBtn" class="btn btn--red">REDEFINIR</button>
+        </div>
+
+        <div id="finishMsg" class="finish-msg" hidden>Circuito finalizado</div>
+      </section>
+    </main>
+
+    <noscript>Ative o JavaScript para usar o Power Fire.</noscript>
+
+    <script src="./app.js" defer></script>
+  </body>
+  </html>
