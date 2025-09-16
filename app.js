@@ -12,9 +12,12 @@
   const phaseLive = document.getElementById('phaseLive');
   const progressArc = document.getElementById('progressArc');
 
-  const prepInput = document.getElementById('prepTime');
-  const exInput = document.getElementById('exTime');
-  const restInput = document.getElementById('restTime');
+  const inpPrepareMin = document.getElementById('inpPrepareMin');
+  const inpPrepareSec = document.getElementById('inpPrepareSec');
+  const inpExerciseMin = document.getElementById('inpExerciseMin');
+  const inpExerciseSec = document.getElementById('inpExerciseSec');
+  const inpRestMin = document.getElementById('inpRestMin');
+  const inpRestSec = document.getElementById('inpRestSec');
   const setsInput = document.getElementById('sets');
 
   const startBtn = document.getElementById('startBtn');
@@ -87,6 +90,11 @@
     // Some browsers may return only HH:MM even when hours are 0
     return 0;
   }
+
+  // Helpers MM+SS
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v || 0));
+  const toSecs = (mm, ss) => (clamp(parseInt(mm, 10), 0, 999) * 60) + clamp(parseInt(ss, 10), 0, 59);
+  const fromSecs = (total) => ({ mm: Math.floor((total || 0) / 60), ss: (total || 0) % 60 });
 
   function pad2(n) { return n.toString().padStart(2, '0'); }
 
@@ -457,9 +465,10 @@
   }
 
   function readSettingsFromInputs() {
-    const p = parseTimeToSeconds(prepInput.value);
-    const e = parseTimeToSeconds(exInput.value);
-    const r = parseTimeToSeconds(restInput.value);
+    normalizeTimePairs();
+    const p = toSecs(inpPrepareMin.value, inpPrepareSec.value);
+    const e = toSecs(inpExerciseMin.value, inpExerciseSec.value);
+    const r = toSecs(inpRestMin.value, inpRestSec.value);
     const s = parseInt(setsInput.value || '1', 10);
     return validateSettings(p, e, r, s);
   }
@@ -475,9 +484,18 @@
       const raw = localStorage.getItem('pf:last-settings');
       if (!raw) return;
       const s = JSON.parse(raw);
-      if (typeof s.prepare === 'number') prepInput.value = fmtHMMSS(s.prepare);
-      if (typeof s.exercise === 'number') exInput.value = fmtHMMSS(s.exercise);
-      if (typeof s.rest === 'number') restInput.value = fmtHMMSS(s.rest);
+      if (typeof s.prepare === 'number') {
+        const { mm, ss } = fromSecs(s.prepare);
+        inpPrepareMin.value = mm; inpPrepareSec.value = ss;
+      }
+      if (typeof s.exercise === 'number') {
+        const { mm, ss } = fromSecs(s.exercise);
+        inpExerciseMin.value = mm; inpExerciseSec.value = ss;
+      }
+      if (typeof s.rest === 'number') {
+        const { mm, ss } = fromSecs(s.rest);
+        inpRestMin.value = mm; inpRestSec.value = ss;
+      }
       if (typeof s.sets === 'number') setsInput.value = s.sets;
       const seq = buildPlan(s);
       updateTotalTimeFooter(seq);
@@ -513,13 +531,25 @@
     }
   }
 
+  function presetValueToSeconds(val) {
+    if (typeof val === 'number') return Math.max(0, val | 0);
+    if (typeof val === 'string') return parseTimeToSeconds(val);
+    return 0;
+  }
+
   function applyPresetByName(name) {
     const list = loadPresets();
     const p = list.find(x => x.name === name);
     if (!p) return;
-    prepInput.value = p.prepare;
-    exInput.value = p.exercise;
-    restInput.value = p.rest;
+    const pSec = presetValueToSeconds(p.prepare);
+    const eSec = presetValueToSeconds(p.exercise);
+    const rSec = presetValueToSeconds(p.rest);
+    const { mm: pMm, ss: pSs } = fromSecs(pSec);
+    const { mm: eMm, ss: eSs } = fromSecs(eSec);
+    const { mm: rMm, ss: rSs } = fromSecs(rSec);
+    inpPrepareMin.value = pMm; inpPrepareSec.value = pSs;
+    inpExerciseMin.value = eMm; inpExerciseSec.value = eSs;
+    inpRestMin.value = rMm; inpRestSec.value = rSs;
     setsInput.value = p.sets;
     const seq = buildPlan(readSettingsFromInputs());
     updateTotalTimeFooter(seq);
@@ -530,11 +560,12 @@
     if (!name) return;
     const list = loadPresets();
     const exists = list.findIndex(x => x.name === name);
+    normalizeTimePairs();
     const preset = {
       name,
-      prepare: prepInput.value,
-      exercise: exInput.value,
-      rest: restInput.value,
+      prepare: toSecs(inpPrepareMin.value, inpPrepareSec.value),
+      exercise: toSecs(inpExerciseMin.value, inpExerciseSec.value),
+      rest: toSecs(inpRestMin.value, inpRestSec.value),
       sets: setsInput.value
     };
     if (exists >= 0) list[exists] = preset; else list.push(preset);
@@ -673,11 +704,33 @@
   deletePresetBtn.addEventListener('click', handleDeletePreset);
 
   // Update total time footer when inputs change
-  for (const el of [prepInput, exInput, restInput, setsInput]) {
+  for (const el of [inpPrepareMin, inpPrepareSec, inpExerciseMin, inpExerciseSec, inpRestMin, inpRestSec, setsInput]) {
     el.addEventListener('change', () => {
       const seq = buildPlan(readSettingsFromInputs());
       updateTotalTimeFooter(seq);
     });
+  }
+
+  // Normalização de SS >= 60 para MM+carrego
+  function normalizeTimePair(minEl, secEl) {
+    let mm = clamp(parseInt(minEl.value, 10) || 0, 0, 999);
+    let ss = clamp(parseInt(secEl.value, 10) || 0, 0, 5999); // suporta entradas maiores antes de normalizar
+    if (ss >= 60) {
+      mm = clamp(mm + Math.floor(ss / 60), 0, 999);
+      ss = ss % 60;
+    }
+    minEl.value = mm;
+    secEl.value = ss;
+  }
+
+  function normalizeTimePairs() {
+    normalizeTimePair(inpPrepareMin, inpPrepareSec);
+    normalizeTimePair(inpExerciseMin, inpExerciseSec);
+    normalizeTimePair(inpRestMin, inpRestSec);
+  }
+
+  for (const secEl of [inpPrepareSec, inpExerciseSec, inpRestSec]) {
+    secEl.addEventListener('blur', () => normalizeTimePairs());
   }
 
   // Service Worker registration

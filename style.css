@@ -134,7 +134,6 @@ body::before {
 }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field label { color: var(--muted); font-size: .9rem; }
-.field input[type="time"],
 .field input[type="number"] {
   padding: 10px 12px;
   border-radius: 10px;
@@ -143,6 +142,16 @@ body::before {
   color: var(--text);
 }
 .field input:focus { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Pares de tempo MM:SS */
+.time-pair { display: flex; gap: 8px; align-items: center; }
+.time-pair .sep { opacity: .8; }
+.time-pair input[type="number"] { width: 84px; text-align: center; }
+
+/* Remover setas dos numbers (opcional) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
+input[type="number"]{ -moz-appearance: textfield; }
 
 .buttons {
   display: grid;

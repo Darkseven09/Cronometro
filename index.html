@@ -24,16 +24,28 @@
         <section class="controls">
           <form id="configForm" class="config" novalidate>
             <div class="field">
-              <label for="prepTime">Prepare</label>
-              <input id="prepTime" type="time" step="1" value="00:05" required />
+              <label for="inpPrepareMin">Prepare</label>
+              <div class="time-pair">
+                <input id="inpPrepareMin" type="number" inputmode="numeric" pattern="[0-9]*" step="1" min="0" placeholder="MM" value="0" />
+                <span class="sep">:</span>
+                <input id="inpPrepareSec" type="number" inputmode="numeric" pattern="[0-9]*" step="1" min="0" max="59" placeholder="SS" value="5" />
+              </div>
             </div>
             <div class="field">
-              <label for="exTime">Exercite</label>
-              <input id="exTime" type="time" step="1" value="00:30" required />
+              <label for="inpExerciseMin">Exercite</label>
+              <div class="time-pair">
+                <input id="inpExerciseMin" type="number" inputmode="numeric" pattern="[0-9]*" step="1" min="0" placeholder="MM" value="0" />
+                <span class="sep">:</span>
+                <input id="inpExerciseSec" type="number" inputmode="numeric" pattern="[0-9]*" step="1" min="0" max="59" placeholder="SS" value="30" />
+              </div>
             </div>
             <div class="field">
-              <label for="restTime">Descanso</label>
-              <input id="restTime" type="time" step="1" value="00:30" required />
+              <label for="inpRestMin">Descanso</label>
+              <div class="time-pair">
+                <input id="inpRestMin" type="number" inputmode="numeric" pattern="[0-9]*" step="1" min="0" placeholder="MM" value="0" />
+                <span class="sep">:</span>
+                <input id="inpRestSec" type="number" inputmode="numeric" pattern="[0-9]*" step="1" min="0" max="59" placeholder="SS" value="30" />
+              </div>
             </div>
             <div class="field">
               <label for="sets">Conjuntos</label>
